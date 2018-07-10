@@ -1,0 +1,93 @@
+<html>
+  <head>
+    <meta charset="utf8" />
+    <title>Betamax Crinkledash</title>
+    <style>
+      body {
+        font-family: Proxima Nova, sans-serif;
+        background-color: #272727;
+        color: #eee;
+        border-color: #eee;
+        padding: 0 40px;
+        font-weight: normal;
+        display: flex;
+        flex-flow: column;
+        box-sizing: border-box;
+        height: 100%;
+        margin: 0;
+      }
+      header {
+        display: flex;
+        border-bottom: 1px solid;
+      }
+      header > h1 {
+        font-weight: normal;
+        font-size: 24px;
+      }
+      header > h2 {
+        margin: auto 20px;
+        font-weight: normal;
+        font-size: 18px;
+        opacity: 0.8;
+      }
+      main {
+        flex-grow: 1;
+      }
+      .name {
+        text-align: center;
+        margin: 40px;
+        font-size: 40px;
+      }
+      button {
+        display: block;
+        width: 200px;
+        margin: 0 auto;
+        background: #1d1d1d;
+        border: 1px solid #eee;
+        padding: 20px;
+        color: #eee;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #111;
+      }
+      a {
+        color: #aaf;
+      }
+      a:visited {
+        color: #cac;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Betamax Crinkledash</h1>
+      <h2>a name generator</h2>
+    </header>
+    <main>
+      <div id="result" class="name">Betamax Crinkledash</div>
+      <button id="generate">Generate new name</button>
+    </main>
+    <footer>
+      <p>Powered by the <a href="">CMU Pronouncing Dictionary</a>. Please see the copywrite notice <a href="./cmudict-0.7b">here.</a></p>
+      <p>Inspired by the opening the discussion of Episode #34 of the delightful <a href="https://artifexian.com">Artifexian Podcast.</a></p>
+    </footer>
+
+    <script>
+      const dataPromise = fetch('./betamaxcrinkledash.json')
+        .then(response => response.json());
+
+      function choice(array) {
+        return array[Math.floor(Math.random() * array.length)];
+      }
+
+      function generate() {
+        dataPromise.then(json => {
+          document.getElementById('result').textContent = `${choice(json.benedict)} ${choice(json.cumberbatch)}`;
+        });
+      }
+
+      document.getElementById('generate').addEventListener('click', generate);
+    </script>
+  </body>
+</html>
