@@ -8,16 +8,18 @@ def main():
   input_file = open("cmudict-0.7b")
   benedicts = []
   cumberbatches = []
+  words = []
   for line in input_file:
     if line.startswith(";;;"):
       continue
     (word, phonemes) = line.split("  ")
     word = clean_word(word)
     phonemes = [phoneme.strip() for phoneme in phonemes.split(" ")]
-    if is_benedict(phonemes) and not is_inflected(word, benedicts + cumberbatches):
+    if is_benedict(phonemes) and not is_inflected(word, words):
       benedicts.append(word)
-    if is_cumberbatch(phonemes) and not is_inflected(word, benedicts + cumberbatches):
+    if is_cumberbatch(phonemes) and not is_inflected(word, words):
       cumberbatches.append(word)
+    words.append(word)
   input_file.close()
 
   output_file = open("betamaxcrinkledash.json", "w")
@@ -62,6 +64,33 @@ def is_vowel(phoneme):
   stressless_phoneme = phoneme.strip("012")
   return stressless_phoneme in VOWELS
 
+def is_plosive(phoneme):
+  PLOSIVES = ("B", "D", "G", "K", "P", "T")
+  return phoneme in PLOSIVES
+
+def is_fricative(phoneme):
+  FRICATIVES = ("F", "V", "DH", "TH", "S", "Z", "SH", "ZH")
+  return phoneme in FRICATIVES
+
+def is_affricate(phoneme):
+  AFFRICATES = ("CH", "JH")
+  return phoneme in AFFRICATES
+
+def is_semivowel(phoneme):
+  SEMIVOWELS = ("W", "Y")
+  return phoneme in SEMIVOWELS
+
+def is_liquid(phoneme):
+  LIQUIDS = ("L", "R")
+  return phoneme in LIQUIDS
+
+def is_aspirate(phoneme):
+  return phoneme == "HH"
+
+def is_voiceless(phoneme):
+  VOICELESS = ("P", "T", "K", "F", "S", "SH", "TH", "CH", "HH")
+  return phoneme in VOICELESS
+
 def get_vowels(phonemes):
   return [phoneme for phoneme in phonemes if is_vowel(phoneme)]
 
@@ -76,7 +105,14 @@ def is_benedict(phonemes):
   vowels = get_vowels(phonemes)
   return (
     phonemes[0] in ("B", "P", "V")
-    and (not is_vowel(phonemes[-1]))
+    and (
+      is_affricate(phonemes[-1])
+      or is_plosive(phonemes[-1])
+      or (
+        is_fricative(phonemes[-1])
+        and is_voiceless(phonemes[-1])
+      )
+    )
     and len(vowels) == 3
     and fits_stress_rhythm(vowels)
   )
@@ -88,9 +124,18 @@ def is_cumberbatch(phonemes):
     and (not is_vowel(phonemes[-1]))
     and len(vowels) == 3
     and fits_stress_rhythm(vowels)
+    and phonemes[0] in ("K", "G")
     and (
-      phonemes[0] in ("K", "G")
-      or phonemes[-1] in ("CH", "JH")
+      is_affricate(phonemes[-1])
+      or vowels[-1] == "AE"
+      or (
+        is_voiceless(phonemes[-1])
+        and (is_plosive(phonemes[-1]) or is_fricative(phonemes[-1]))
+      )
+      or (
+        (is_plosive(phonemes[-1]) or is_fricative(phonemes[-1]) or is_liquid(phonemes[-1]))
+        and (is_plosive(phonemes[-2]) or is_fricative(phonemes[-2]))
+      )
     )
   )
 
