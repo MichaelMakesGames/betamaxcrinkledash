@@ -14,9 +14,9 @@ def main():
     (word, phonemes) = line.split("  ")
     word = clean_word(word)
     phonemes = [phoneme.strip() for phoneme in phonemes.split(" ")]
-    if is_benedict(phonemes):
+    if is_benedict(phonemes) and not is_inflected(word, benedicts + cumberbatches):
       benedicts.append(word)
-    if is_cumberbatch(phonemes):
+    if is_cumberbatch(phonemes) and not is_inflected(word, benedicts + cumberbatches):
       cumberbatches.append(word)
   input_file.close()
 
@@ -25,7 +25,7 @@ def main():
     "benedict": benedicts,
     "cumberbatch": cumberbatches
   }
-  json.dump(result, output_file)
+  json.dump(result, output_file, indent=2, separators=(",", ": "))
   output_file.close()
 
   print "random examples:"
@@ -35,6 +35,21 @@ def main():
 def clean_word(word):
   regex = re.compile("[^a-zA-Z]")
   return regex.sub("", word).title()
+
+def is_inflected(word, words):
+  if word.endswith("s"):
+    if word[:-1] in words:
+      return True
+  if word.endswith("es"):
+    if word[:-2] in words:
+      return True
+  if word.endswith("d"):
+    if word[:-1] in words:
+      return True
+  if word.endswith("ed"):
+    if word[:-2] in words:
+      return True
+  return word in words
 
 def is_vowel(phoneme):
   VOWELS = (
